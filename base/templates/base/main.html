@@ -1,184 +1,482 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="utf-8">
-    <meta name="description" content="This is a to-do list application implemented using Django.">
+    <meta name="description" content="List-Loom: A modern task management application">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>List-Loom: Your Modern To-Do List</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <style>
-        body {
-            background-color: #f4f4f9;
-            font-family: 'Poppins', sans-serif;
-            margin: 0;
-            padding-top: 50px;
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
-        .container {
-            max-width: 600px;
-            margin: auto;
-            background-color: #fff;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            border-radius: 8px;
-            overflow: hidden;
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes scaleIn {
+            from {
+                transform: scale(0.95);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        @keyframes shimmer {
+            0% {
+                background-position: -1000px 0;
+            }
+            100% {
+                background-position: 1000px 0;
+            }
+        }
+
+        :root {
+            --primary: #3b82f6;
+            --primary-light: #60a5fa;
+            --primary-dark: #2563eb;
+            --success: #22c55e;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --background: #f8fafc;
+            --surface: #ffffff;
+            --text: #0f172a;
+            --text-light: #64748b;
+            --border: #e2e8f0;
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--background);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            color: var(--text);
+            line-height: 1.5;
+            min-height: 100vh;
+        }
+
+        .app-container {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            min-height: 100vh;
+            position: relative;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .sidebar {
+            background: var(--surface);
+            border-right: 1px solid var(--border);
+            padding: 2rem;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        .sidebar-header {
+            margin-bottom: 2rem;
+        }
+
+        .logo {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+            background: linear-gradient(45deg, var(--primary), var(--primary-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            transition: all 0.3s ease;
+        }
+
+        .logo:hover {
+            transform: translateY(-1px);
+            text-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+        }
+
+        .main-content {
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+            animation: scaleIn 0.5s ease-out;
         }
 
         .header-bar {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 15px 20px;
-            background: linear-gradient(to right, #6a11cb 0%, #2575fc 100%);
-            color: #fff;
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            background: var(--surface);
+            border-radius: 16px;
+            box-shadow: var(--shadow-md);
+            transition: all 0.3s ease;
+        }
+
+        .header-bar:hover {
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-2px);
+        }
+
+        .header-bar h1 {
+            font-size: 1.75rem;
+            font-weight: 600;
+            color: var(--text);
+            position: relative;
+        }
+
+        .header-bar h1::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 40px;
+            height: 3px;
+            background: var(--primary);
+            border-radius: 2px;
+            transition: width 0.3s ease;
+        }
+
+        .header-bar h1:hover::after {
+            width: 100%;
         }
 
         .header-bar a {
-            color: #ffffff;
+            color: var(--text-light);
             text-decoration: none;
-            font-weight: 500;
+            padding: 0.75rem 1.5rem;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            background: transparent;
+            border: 1px solid var(--border);
+        }
+
+        .header-bar a:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
         }
 
         .card-body {
-            padding: 20px;
+            background: var(--surface);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: var(--shadow-md);
+            transition: all 0.3s ease;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        .card-body:hover {
+            box-shadow: var(--shadow-lg);
         }
 
         input[type=text],
         input[type=password],
-        textarea,
-        .button {
+        textarea {
             width: 100%;
-            padding: 12px 20px;
-            margin: 8px 0;
-            display: inline-block;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            box-sizing: border-box;
+            padding: 1rem 1.25rem;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            font-family: inherit;
+            font-size: 1rem;
             transition: all 0.3s ease;
-        }
-
-        input[type=submit],
-        .button {
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            cursor: pointer;
-        }
-
-        input[type=submit]:hover,
-        .button:hover {
-            background-color: #45a049;
+            background: var(--background);
         }
 
         input[type=text]:focus,
         input[type=password]:focus,
         textarea:focus {
-            border-color: #4CAF50;
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+            transform: translateY(-1px);
         }
 
-        label {
-            padding-top: 10px;
+        .button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.875rem 1.75rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 12px;
             font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
         }
 
-        ::placeholder {
-            font-weight: 300;
-            opacity: 0.8;
-        }
-
-        /* Task List Styles */
-        .task-items-wrapper {
-            padding: 10px;
+        .button::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, 
+                transparent, rgba(255,255,255,0.2), transparent);
+            animation: shimmer 2s infinite;
+            transform: skewX(-20deg);
+        }
+
+        .button:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+        }
+
+        .button:active {
+            transform: translateY(0);
+        }
+
+        .task-items-wrapper {
+            display: grid;
+            gap: 1rem;
+            margin-top: 1rem;
         }
 
         .task-wrapper {
+            background: var(--surface);
+            border-radius: 12px;
+            padding: 1.25rem;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 10px;
-            border: 1px solid #ccc;
-            background-color: #fff;
-            border-radius: 8px;
-            margin-bottom: 10px;
+            border: 1px solid var(--border);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            animation: slideIn 0.5s ease-out;
+        }
+
+        .task-wrapper:hover {
+            transform: translateY(-3px) scale(1.01);
+            box-shadow: var(--shadow-md);
+            border-color: var(--primary-light);
         }
 
         .task-title {
-            flex-grow: 1;
             display: flex;
             align-items: center;
+            gap: 1rem;
         }
 
-        .task-complete-icon,
-        .task-incomplete-icon {
-            margin-right: 10px;
-            height: 20px;
-            width: 20px;
+        .task-title a {
+            color: var(--text);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .task-title a:hover {
+            color: var(--primary);
+        }
+
+        .task-complete-icon {
+            width: 24px;
+            height: 24px;
             border-radius: 50%;
-            background-color: #ccc;
+            background: var(--success);
+            transition: all 0.3s ease;
+            position: relative;
         }
 
-        .delete-link,
+        .task-complete-icon::after {
+            content: '✓';
+            color: white;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 14px;
+        }
+
+        .task-incomplete-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: 2px solid var(--text-light);
+            transition: all 0.3s ease;
+        }
+
+        .task-incomplete-icon:hover {
+            border-color: var(--primary);
+            transform: scale(1.1);
+        }
+
+        .task-controls {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .delete-link {
+            color: var(--danger);
+            text-decoration: none;
+            font-size: 1.25rem;
+            opacity: 0.7;
+            transition: all 0.3s ease;
+            padding: 0.5rem;
+            border-radius: 8px;
+        }
+
+        .delete-link:hover {
+            opacity: 1;
+            background: rgba(239, 68, 68, 0.1);
+            transform: scale(1.1);
+        }
+
         .handle {
-            margin-left: 10px;
-            cursor: pointer;
-            font-size: 24px;
-            color: #E53935;
+            cursor: grab;
+            color: var(--text-light);
+            padding: 0.5rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
         }
 
-        .handle {
-            color: #333;
+        .handle:hover {
+            background: var(--background);
+            color: var(--primary);
         }
 
-        /* Add New Task Button and Search Section */
+        .handle:active {
+            cursor: grabbing;
+        }
+
         #search-add-wrapper {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px;
-            background: #fff;
-            border-radius: 8px;
-            margin-top: 10px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+            gap: 1rem;
+            margin-bottom: 2rem;
+            animation: slideIn 0.5s ease-out;
         }
 
         #search-add-wrapper form {
-            flex-grow: 1;
+            flex: 1;
+            display: flex;
+            gap: 0.75rem;
         }
 
         #add-link {
-            display: inline-block;
-            background-color: #4CAF50;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 48px;
+            height: 48px;
+            background: var(--primary);
             color: white;
-            text-align: center;
-            padding: 10px 15px;
-            font-size: 24px;
-            margin-left: 10px;
-            border-radius: 5px;
-            cursor: pointer;
+            border-radius: 12px;
             text-decoration: none;
+            font-size: 1.75rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
         }
 
         #add-link:hover {
-            background-color: #45a049;
+            background: var(--primary-dark);
+            transform: rotate(90deg) scale(1.1);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
         }
 
-        input[type='text'] {
-            padding: 8px;
-            margin-right: 5px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
+        @media (max-width: 768px) {
+            .app-container {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                display: none;
+            }
+
+            .main-content {
+                padding: 1rem;
+            }
+
+            #search-add-wrapper {
+                flex-direction: column;
+            }
+
+            #search-add-wrapper form {
+                width: 100%;
+            }
+
+            .header-bar {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+
+            .header-bar h1::after {
+                left: 50%;
+                transform: translateX(-50%);
+            }
+        }
+
+        /* Loading animation */
+        .loading {
+            position: relative;
+        }
+
+        .loading::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                90deg,
+                transparent,
+                rgba(255, 255, 255, 0.2),
+                transparent
+            );
+            animation: shimmer 2s infinite;
         }
     </style>
 </head>
 
 <body>
-    <div class="container">
-        {% block content %} {% endblock content %}
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">ListLoom</div>
+                <p style="color: var(--text-light);">Organize with Ease</p>
+            </div>
+            <nav>
+                <!-- Add navigation items here if needed -->
+            </nav>
+        </aside>
+        
+        <main class="main-content">
+            {% block content %}{% endblock content %}
+        </main>
     </div>
 </body>
-
 </html>
