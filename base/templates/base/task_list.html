@@ -4,7 +4,7 @@
 <div class="header-bar">
     <div>
         <h1>Hello {{request.user|title}}</h1>
-        <h3 style="margin:0">You have <i>{{count}}</i> incomplete task{{ count|pluralize:"s" }}</h3>
+        <h3 style="margin:0">You have {{count}} incomplete task{{ count|pluralize:"s" }}</h3>
     </div>
 
     {% if request.user.is_authenticated %}
@@ -15,7 +15,7 @@
 
 <div id="search-add-wrapper">
     <form method="GET" style="display: flex;">
-        <input type='text' name='search-area' placeholder="Search your task" value="{{search_input}}">
+        <input type='text' name='search-area' placeholder="Search for tasks" value="{{search_input}}">
         <input class="button" type="submit" value='Search'>
     </form>
     {% if tasks|length > 0 %}

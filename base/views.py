@@ -9,7 +9,6 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login
 
-# Imports for Reordering Feature
 from django.views import View
 from django.shortcuts import redirect
 from django.db import transaction
